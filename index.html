@@ -31,6 +31,14 @@
             opacity: 0; /* Start elements as invisible */
             animation: fadeIn 1.5s ease-in-out forwards;
         }
+
+        @keyframes floatUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .notification {
+            animation: floatUp 0.5s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-black">
@@ -167,7 +175,6 @@
                         console.log('SUCCESS!');
                         setIsSubmitted(true);
                     } else {
-                        // Log the detailed error response from the server
                         const errorText = await response.text();
                         console.error('Server responded with an error:', response.status, errorText);
                         throw new Error(`Server error: ${response.status}`);
@@ -282,8 +289,14 @@
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
             const [isFormVisible, setIsFormVisible] = useState(false);
             const [remindEmail, setRemindEmail] = useState('');
-            const [remindStatus, setRemindStatus] = useState({ message: '', type: '' });
+            const [remindEmailError, setRemindEmailError] = useState('');
+            const [notification, setNotification] = useState({ message: '', type: '' });
             const [isRemindSubmitting, setIsRemindSubmitting] = useState(false);
+            
+            const validateEmail = (email) => {
+                const regex = /^[^\s@]+@[^\s@]+\.(com|org|net|edu|gov|io|co|info|biz|dev|app|uk|ca|au|de|fr|jp|cn|in|br|ru|lk)$/i;
+                return regex.test(email);
+            }
 
             useEffect(() => {
                 // Dynamically load fonts
@@ -331,12 +344,22 @@
                 // Cleanup function to clear interval
                 return () => clearInterval(interval);
             }, []);
+            
+            const handleRemindEmailChange = (e) => {
+                const email = e.target.value;
+                setRemindEmail(email);
+                if (email && !validateEmail(email)) {
+                    setRemindEmailError('Please enter a valid email.');
+                } else {
+                    setRemindEmailError('');
+                }
+            };
 
             const handleRemindSubmit = async () => {
-                if (!remindEmail || isRemindSubmitting) return;
+                if (!remindEmail || remindEmailError || isRemindSubmitting) return;
 
                 setIsRemindSubmitting(true);
-                setRemindStatus({ message: '', type: '' });
+                setNotification({ message: '', type: '' });
 
                 try {
                     const response = await fetch('/.netlify/functions/add-contact', {
@@ -346,19 +369,16 @@
                     });
 
                     if (response.ok) {
-                        setRemindStatus({ message: 'Success! We will remind you.', type: 'success' });
+                        setNotification({ message: 'Success! We will remind you.', type: 'success' });
                         setRemindEmail('');
                     } else {
-                        const errorText = await response.text();
-                        console.error('Server responded with an error:', response.status, errorText);
-                        throw new Error(`Server error: ${response.status}`);
+                        throw new Error('Could not add email.');
                     }
                 } catch (error) {
-                    console.error('FAILED to fetch or process the request:', error);
-                    setRemindStatus({ message: 'Error. Please try again.', type: 'error' });
+                    setNotification({ message: 'Error. Please try again.', type: 'error' });
                 } finally {
                     setIsRemindSubmitting(false);
-                    setTimeout(() => setRemindStatus({ message: '', type: '' }), 5000); // Clear message after 5 seconds
+                    setTimeout(() => setNotification({ message: '', type: '' }), 5000); // Clear message after 5 seconds
                 }
             };
 
@@ -445,27 +465,23 @@
 
                                 {/* --- FULLY RESPONSIVE FORM (PILL HOVER FIXED) --- */}
                                 <div className="mt-8 w-full max-w-md mx-auto">
-                                    <div className="flex flex-row items-center bg-[#fdf8ed] rounded-full shadow-[inset_0_2px_5px_rgba(0,0,0,0.1)] border border-[#e6e1d9] overflow-hidden">
+                                    <div className={`flex flex-row items-center bg-[#fdf8ed] rounded-full shadow-[inset_0_2px_5px_rgba(0,0,0,0.1)] border transition-all ${remindEmailError ? 'border-red-500' : 'border-[#e6e1d9]'}`}>
                                         <input
                                             type="email"
                                             placeholder="enter your email"
                                             value={remindEmail}
-                                            onChange={(e) => setRemindEmail(e.target.value)}
+                                            onChange={handleRemindEmailChange}
                                             className="flex-1 px-5 py-2 text-black placeholder-gray-500 focus:outline-none bg-transparent text-sm min-w-0"
                                             aria-label="Email for reminder"
                                         />
                                         <div className="flex-shrink-0 group">
-                                            <button onClick={handleRemindSubmit} disabled={isRemindSubmitting} className="flex items-center gap-2 bg-transparent text-[#4a2d0b] font-semibold px-3 sm:px-5 py-2 group-hover:bg-[#f0e7d8] text-sm transition-colors duration-300 rounded-full disabled:opacity-50">
+                                            <button onClick={handleRemindSubmit} disabled={isRemindSubmitting || remindEmailError || !remindEmail} className="flex items-center gap-2 bg-transparent text-[#4a2d0b] font-semibold px-3 sm:px-5 py-2 group-hover:bg-[#f0e7d8] text-sm transition-colors duration-300 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
                                                 <span className="hidden sm:inline">{isRemindSubmitting ? 'Adding...' : 'Remind me'}</span>
                                                 <Bell />
                                             </button>
                                         </div>
                                     </div>
-                                    {remindStatus.message && (
-                                        <p className={`text-xs mt-2 ${remindStatus.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                                            {remindStatus.message}
-                                        </p>
-                                    )}
+                                    {remindEmailError && <p className="text-red-400 text-xs mt-2">{remindEmailError}</p>}
                                 </div>
                             </div>
 
@@ -503,6 +519,14 @@
                             </footer>
                         </div>
                     </div>
+                    {/* Floating Notification */}
+                    {notification.message && (
+                        <div className="fixed bottom-5 left-1/2 -translate-x-1/2">
+                            <div className={`notification rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg ${notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+                                {notification.message}
+                            </div>
+                        </div>
+                    )}
                     <JoinForm isVisible={isFormVisible} onClose={() => setIsFormVisible(false)} />
                 </>
             );
