@@ -167,10 +167,13 @@
                         console.log('SUCCESS!');
                         setIsSubmitted(true);
                     } else {
-                        throw new Error('Failed to send email.');
+                        // Log the detailed error response from the server
+                        const errorText = await response.text();
+                        console.error('Server responded with an error:', response.status, errorText);
+                        throw new Error(`Server error: ${response.status}`);
                     }
                 } catch (err) {
-                    console.log('FAILED...', err);
+                    console.error('FAILED to fetch or process the request:', err);
                     alert('Something went wrong. Please try again.');
                 } finally {
                     setIsSubmitting(false);
@@ -346,9 +349,12 @@
                         setRemindStatus({ message: 'Success! We will remind you.', type: 'success' });
                         setRemindEmail('');
                     } else {
-                        throw new Error('Could not add email.');
+                        const errorText = await response.text();
+                        console.error('Server responded with an error:', response.status, errorText);
+                        throw new Error(`Server error: ${response.status}`);
                     }
                 } catch (error) {
+                    console.error('FAILED to fetch or process the request:', error);
                     setRemindStatus({ message: 'Error. Please try again.', type: 'error' });
                 } finally {
                     setIsRemindSubmitting(false);
