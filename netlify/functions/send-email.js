@@ -10,8 +10,8 @@ exports.handler = async function (event, context) {
   const apiKey = process.env.BREVO_API_KEY; // Access the API key from Netlify's environment variables
 
   // --- REPLACE WITH YOUR EMAIL ADDRESSES ---
-  const senderEmail = 'SENDER_EMAIL_YOU_VERIFIED_IN_BREVO';
-  const recipientEmail = 'YOUR_EMAIL_WHERE_YOU_WANT_TO_RECEIVE_APPLICATIONS';
+  const senderEmail = 'form@mail.cmleos.org.lk';
+  const recipientEmail = 'harrylklove@gmail.com';
 
   const emailData = {
     sender: { email: senderEmail },
