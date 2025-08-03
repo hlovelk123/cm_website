@@ -346,17 +346,21 @@
             }, []);
             
             const handleRemindEmailChange = (e) => {
-                const email = e.target.value;
-                setRemindEmail(email);
-                if (email && !validateEmail(email)) {
-                    setRemindEmailError('Please enter a valid email.');
-                } else {
+                setRemindEmail(e.target.value);
+                // Clear error as soon as user starts typing again
+                if (remindEmailError) {
                     setRemindEmailError('');
                 }
             };
 
             const handleRemindSubmit = async () => {
-                if (!remindEmail || remindEmailError || isRemindSubmitting) return;
+                if (isRemindSubmitting) return;
+
+                // Validate email on click
+                if (!validateEmail(remindEmail)) {
+                    setRemindEmailError('Please enter a valid email.');
+                    return;
+                }
 
                 setIsRemindSubmitting(true);
                 setNotification({ message: '', type: '' });
@@ -475,13 +479,15 @@
                                             aria-label="Email for reminder"
                                         />
                                         <div className="flex-shrink-0 group">
-                                            <button onClick={handleRemindSubmit} disabled={isRemindSubmitting || remindEmailError || !remindEmail} className="flex items-center gap-2 bg-transparent text-[#4a2d0b] font-semibold px-3 sm:px-5 py-2 group-hover:bg-[#f0e7d8] text-sm transition-colors duration-300 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <button onClick={handleRemindSubmit} disabled={isRemindSubmitting} className="flex items-center gap-2 bg-transparent text-[#4a2d0b] font-semibold px-3 sm:px-5 py-2 group-hover:bg-[#f0e7d8] text-sm transition-colors duration-300 rounded-full disabled:opacity-50">
                                                 <span className="hidden sm:inline">{isRemindSubmitting ? 'Adding...' : 'Remind me'}</span>
                                                 <Bell />
                                             </button>
                                         </div>
                                     </div>
-                                    {remindEmailError && <p className="text-red-400 text-xs mt-2">{remindEmailError}</p>}
+                                    <div className="h-6 pt-2"> {/* Reserve space for the error message */}
+                                        {remindEmailError && <p className="text-red-400 text-xs">{remindEmailError}</p>}
+                                    </div>
                                 </div>
                             </div>
 
@@ -521,8 +527,8 @@
                     </div>
                     {/* Floating Notification */}
                     {notification.message && (
-                        <div className="fixed bottom-5 left-1/2 -translate-x-1/2">
-                            <div className={`notification rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg ${notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+                        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
+                            <div className={`notification rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg backdrop-blur-md border ${notification.type === 'success' ? 'bg-green-500/20 border-green-400/30' : 'bg-red-500/20 border-red-400/30'}`}>
                                 {notification.message}
                             </div>
                         </div>
