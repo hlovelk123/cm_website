@@ -33,8 +33,11 @@ exports.handler = async function (event) {
     const accessToken = await getZohoAccessToken(ZOHO_DATA_CENTER);
     const listKey = process.env.ZOHO_LIST_KEY;
 
-    // --- FIX: Using the correct API endpoint and URL parameters as per the documentation ---
-    const zohoApiUrl = `https://campaigns.zoho.${ZOHO_DATA_CENTER}/api/v1.1/addlistsubscribersinbulk`;
+    // --- FIX: Using the correct API endpoint for individual subscriptions ---
+    const zohoApiUrl = `https://campaigns.zoho.${ZOHO_DATA_CENTER}/api/v1.1/json/listsubscribe`;
+
+    const contactInfo = JSON.stringify({ "Contact Email": email });
+    const encodedBody = `resfmt=JSON&listkey=${listKey}&contactinfo=${encodeURIComponent(contactInfo)}`;
 
     const response = await fetch(zohoApiUrl, {
       method: 'POST',
@@ -42,8 +45,7 @@ exports.handler = async function (event) {
         'Authorization': `Zoho-oauthtoken ${accessToken}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      // The documentation for this endpoint expects the data in the body as form-encoded data.
-      body: `resfmt=JSON&listkey=${listKey}&emailids=${email}`
+      body: encodedBody
     });
     
     const responseBodyText = await response.text();
