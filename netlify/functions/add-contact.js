@@ -37,14 +37,17 @@ exports.handler = async function (event) {
     const zohoDomain = "com"; // Change to "eu", "in", etc. if needed.
     const zohoApiUrl = `https://campaigns.zoho.${zohoDomain}/api/v1.1/json/listsubscribe`;
 
+    // Correctly format the body for application/x-www-form-urlencoded
+    const contactInfo = JSON.stringify({ "Contact Email": email });
+    const encodedBody = `resfmt=JSON&listkey=${listKey}&contactinfo=${encodeURIComponent(contactInfo)}`;
+
     const response = await fetch(zohoApiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Zoho-oauthtoken ${accessToken}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      // Zoho expects this specific endpoint to receive form-encoded data
-      body: `resfmt=JSON&listkey=${listKey}&contactinfo=${JSON.stringify({"Contact Email": email})}`
+      body: encodedBody
     });
     
     // --- Enhanced Debugging ---
@@ -56,8 +59,15 @@ exports.handler = async function (event) {
     }
     
     const responseJson = JSON.parse(responseBodyText);
+    // Handle cases where the contact is already subscribed, which Zoho treats as a success.
     if (responseJson.status !== 'success' && responseJson.message !== 'Contact already subscribed.') {
-        throw new Error(`Zoho API Error: ${responseJson.message}`);
+        // Handle specific error codes from the Zoho response if necessary
+        if (responseJson.code === 2402) { // Example: Contact is in Do-Not-Mail
+             console.log("Contact is in Do-Not-Mail registry.");
+             // Decide if this should be an error or a specific success message
+        } else {
+            throw new Error(`Zoho API Error: ${responseJson.message}`);
+        }
     }
 
 
