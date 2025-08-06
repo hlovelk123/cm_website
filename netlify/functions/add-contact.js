@@ -1,7 +1,7 @@
 // This file should be placed in: /netlify/functions/add-contact.js
 
-// A helper function to get a fresh access token from Zoho
-async function getZohoAccessToken() {
+// A helper function to get a fresh access token and the correct API domain from Zoho
+async function getZohoAuthDetails() {
   const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
   const clientId = process.env.ZOHO_CLIENT_ID;
   const clientSecret = process.env.ZOHO_CLIENT_SECRET;
@@ -22,9 +22,10 @@ async function getZohoAccessToken() {
   
   // --- NEW DEBUGGING LOG ---
   // Let's inspect the token we received from Zoho
-  console.log("Successfully received new access token from Zoho:", data);
+  console.log("Successfully received new auth details from Zoho:", data);
   
-  return data.access_token;
+  // Return the whole object containing the access token and the correct api_domain
+  return data;
 }
 
 exports.handler = async function (event) {
@@ -34,13 +35,13 @@ exports.handler = async function (event) {
 
   try {
     const { email } = JSON.parse(event.body);
-    const accessToken = await getZohoAccessToken();
+    const authDetails = await getZohoAuthDetails();
+    const accessToken = authDetails.access_token;
+    const apiDomain = authDetails.api_domain; // Use the domain provided by Zoho
     const listKey = process.env.ZOHO_LIST_KEY;
 
-    // --- IMPORTANT: CHECK YOUR ZOHO DATA CENTER ---
-    // This should match the domain used in getZohoAccessToken
-    const zohoDomain = "com"; // Change to "eu", "in", etc. if needed.
-    const zohoApiUrl = `https://campaigns.zoho.${zohoDomain}/api/v1.1/json/listsubscribe`;
+    // --- FIX: Construct the URL dynamically using the correct api_domain ---
+    const zohoApiUrl = `${apiDomain}/campaigns/v1.1/json/listsubscribe`;
 
     // Correctly format the body for application/x-www-form-urlencoded
     const contactInfo = JSON.stringify({ "Contact Email": email });
