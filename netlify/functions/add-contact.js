@@ -19,6 +19,11 @@ async function getZohoAccessToken() {
     throw new Error('Failed to refresh Zoho token');
   }
   const data = await response.json();
+  
+  // --- NEW DEBUGGING LOG ---
+  // Let's inspect the token we received from Zoho
+  console.log("Successfully received new access token from Zoho:", data);
+  
   return data.access_token;
 }
 
