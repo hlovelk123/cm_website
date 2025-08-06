@@ -37,11 +37,11 @@ exports.handler = async function (event) {
     const { email } = JSON.parse(event.body);
     const authDetails = await getZohoAuthDetails();
     const accessToken = authDetails.access_token;
-    const apiDomain = authDetails.api_domain; // Use the domain provided by Zoho
     const listKey = process.env.ZOHO_LIST_KEY;
 
-    // --- FIX: Construct the URL dynamically using the correct api_domain ---
-    const zohoApiUrl = `${apiDomain}/campaigns/v1.1/json/listsubscribe`;
+    // --- FIX: Construct the URL directly for Zoho Campaigns ---
+    const zohoDomain = "com"; // Change to "eu", "in", etc. if needed.
+    const zohoApiUrl = `https://campaigns.zoho.${zohoDomain}/api/v1.1/json/listsubscribe`;
 
     // Correctly format the body for application/x-www-form-urlencoded
     const contactInfo = JSON.stringify({ "Contact Email": email });
