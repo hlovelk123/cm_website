@@ -6,8 +6,11 @@ async function getZohoAccessToken() {
   const clientId = process.env.ZOHO_CLIENT_ID;
   const clientSecret = process.env.ZOHO_CLIENT_SECRET;
 
-  // Note: If your Zoho account is in a different data center (e.g., .eu, .in), you may need to change this URL.
-  const url = `https://accounts.zoho.com/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`;
+  // --- IMPORTANT: CHECK YOUR ZOHO DATA CENTER ---
+  // If your Zoho account URL ends in .eu, .in, .com.au, etc., change this value.
+  const zohoDomain = "com"; // Change to "eu", "in", etc. if needed.
+
+  const url = `https://accounts.zoho.${zohoDomain}/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`;
 
   const response = await fetch(url, { method: 'POST' });
   if (!response.ok) {
@@ -29,9 +32,10 @@ exports.handler = async function (event) {
     const accessToken = await getZohoAccessToken();
     const listKey = process.env.ZOHO_LIST_KEY;
 
-    // --- FIX: Use the correct API endpoint which includes the data center ---
-    // Note: If your account is in a different data center, change ".com" accordingly (e.g., campaigns.zoho.eu)
-    const zohoApiUrl = `https://campaigns.zoho.com/api/v1.1/json/listsubscribe`;
+    // --- IMPORTANT: CHECK YOUR ZOHO DATA CENTER ---
+    // This should match the domain used in getZohoAccessToken
+    const zohoDomain = "com"; // Change to "eu", "in", etc. if needed.
+    const zohoApiUrl = `https://campaigns.zoho.${zohoDomain}/api/v1.1/json/listsubscribe`;
 
     const response = await fetch(zohoApiUrl, {
       method: 'POST',
