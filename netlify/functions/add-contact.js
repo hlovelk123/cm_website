@@ -1,71 +1,60 @@
-// This file should be placed in: /netlify/functions/add-contact.js
+// /netlify/functions/add-contact.js
 
-exports.handler = async function (event, context) {
-  console.log("Function invoked.");
+// A helper function to get a fresh access token from Zoho
+async function getZohoAccessToken() {
+  const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
+  const clientId = process.env.ZOHO_CLIENT_ID;
+  const clientSecret = process.env.ZOHO_CLIENT_SECRET;
 
+  const url = `https://accounts.zoho.com/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`;
+
+  const response = await fetch(url, { method: 'POST' });
+  if (!response.ok) {
+    throw new Error('Failed to refresh Zoho token');
+  }
+  const data = await response.json();
+  return data.access_token;
+}
+
+exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
-    console.log("Method not allowed:", event.httpMethod);
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const apiKey = process.env.BREVO_API_KEY;
-  const listId = process.env.BREVO_LIST_ID;
-
-  // --- DEBUGGING LOGS ---
-  // Let's see if the environment variables are accessible
-  console.log("BREVO_API_KEY found:", !!apiKey); 
-  console.log("BREVO_LIST_ID found:", !!listId, "(Value: " + listId + ")");
-
-  let email;
   try {
-    const body = JSON.parse(event.body);
-    email = body.email;
-    console.log("Received email from form:", email);
-  } catch (error) {
-    console.error("Could not parse request body:", error);
-    return { statusCode: 400, body: 'Bad request: Could not parse JSON.' };
-  }
-  
-  if (!email || !apiKey || !listId) {
-    console.error("Validation failed: Missing email, API key, or List ID.");
-    return { statusCode: 400, body: 'Missing email, API key, or List ID.' };
-  }
+    const { email } = JSON.parse(event.body);
+    const accessToken = await getZohoAccessToken();
+    const listKey = process.env.ZOHO_LIST_KEY;
 
-  const contactData = {
-    email: email,
-    listIds: [parseInt(listId, 10)],
-    updateEnabled: true
-  };
+    const zohoApiUrl = `https://campaigns.zoho.com/api/v1.1/addlistsubscribersinbulk`;
 
-  try {
-    console.log("Sending data to Brevo...");
-    const response = await fetch('https://api.brevo.com/v3/contacts', {
+    const response = await fetch(zohoApiUrl, {
       method: 'POST',
       headers: {
-        'accept': 'application/json',
-        'api-key': apiKey,
-        'content-type': 'application/json',
+        'Authorization': `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(contactData),
+      body: JSON.stringify({
+        listkey: listKey,
+        emailids: email,
+      }),
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error('Brevo API Error:', errorBody);
-      return { statusCode: response.status, body: `Brevo API Error: ${errorBody}` };
+      console.error('Zoho API Error:', errorBody);
+      throw new Error(`Zoho API Error: ${errorBody}`);
     }
 
-    const data = await response.json();
-    console.log("Successfully added contact to Brevo.");
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Contact added successfully", data }),
+      body: JSON.stringify({ message: 'Contact added successfully' }),
     };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error:', error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to send email' }),
+      body: JSON.stringify({ error: 'Failed to add contact' }),
     };
   }
 };
