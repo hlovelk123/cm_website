@@ -6,6 +6,7 @@ async function getZohoAccessToken() {
   const clientId = process.env.ZOHO_CLIENT_ID;
   const clientSecret = process.env.ZOHO_CLIENT_SECRET;
 
+  // Note: If your Zoho account is in a different data center (e.g., .eu, .in), you may need to change this URL.
   const url = `https://accounts.zoho.com/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`;
 
   const response = await fetch(url, { method: 'POST' });
@@ -28,7 +29,8 @@ exports.handler = async function (event) {
     const accessToken = await getZohoAccessToken();
     const listKey = process.env.ZOHO_LIST_KEY;
 
-    // --- FIX: Use the 'listsubscribe' endpoint with contactinfo in the body ---
+    // --- FIX: Use the correct API endpoint which includes the data center ---
+    // Note: If your account is in a different data center, change ".com" accordingly (e.g., campaigns.zoho.eu)
     const zohoApiUrl = `https://campaigns.zoho.com/api/v1.1/json/listsubscribe`;
 
     const response = await fetch(zohoApiUrl, {
@@ -50,7 +52,7 @@ exports.handler = async function (event) {
     }
     
     const responseJson = JSON.parse(responseBodyText);
-    if (responseJson.status !== 'success') {
+    if (responseJson.status !== 'success' && responseJson.message !== 'Contact already subscribed.') {
         throw new Error(`Zoho API Error: ${responseJson.message}`);
     }
 
