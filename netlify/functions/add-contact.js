@@ -1,14 +1,10 @@
 // This file should be placed in: /netlify/functions/add-contact.js
 
-// A helper function to get a fresh access token and the correct API domain from Zoho
-async function getZohoAuthDetails() {
+// A helper function to get a fresh access token from Zoho
+async function getZohoAccessToken(zohoDomain) {
   const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
   const clientId = process.env.ZOHO_CLIENT_ID;
   const clientSecret = process.env.ZOHO_CLIENT_SECRET;
-
-  // --- IMPORTANT: CHECK YOUR ZOHO DATA CENTER ---
-  // If your Zoho account URL ends in .eu, .in, .com.au, etc., change this value.
-  const zohoDomain = "com"; // Change to "eu", "in", etc. if needed.
 
   const url = `https://accounts.zoho.${zohoDomain}/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`;
 
@@ -19,13 +15,8 @@ async function getZohoAuthDetails() {
     throw new Error('Failed to refresh Zoho token');
   }
   const data = await response.json();
-  
-  // --- NEW DEBUGGING LOG ---
-  // Let's inspect the token we received from Zoho
   console.log("Successfully received new auth details from Zoho:", data);
-  
-  // Return the whole object containing the access token and the correct api_domain
-  return data;
+  return data.access_token;
 }
 
 exports.handler = async function (event) {
@@ -33,19 +24,17 @@ exports.handler = async function (event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  // --- 1. SET YOUR ZOHO DATA CENTER DOMAIN ---
+  // Check your Zoho Campaigns URL. If it's campaigns.zoho.eu, change this to "eu".
+  const ZOHO_DATA_CENTER = "com"; // E.g., "com", "eu", "in", "com.au"
+
   try {
     const { email } = JSON.parse(event.body);
-    const authDetails = await getZohoAuthDetails();
-    const accessToken = authDetails.access_token;
+    const accessToken = await getZohoAccessToken(ZOHO_DATA_CENTER);
     const listKey = process.env.ZOHO_LIST_KEY;
 
-    // --- FIX: Construct the URL directly for Zoho Campaigns ---
-    const zohoDomain = "com"; // Change to "eu", "in", etc. if needed.
-    const zohoApiUrl = `https://campaigns.zoho.${zohoDomain}/api/v1.1/json/listsubscribe`;
-
-    // Correctly format the body for application/x-www-form-urlencoded
-    const contactInfo = JSON.stringify({ "Contact Email": email });
-    const encodedBody = `resfmt=JSON&listkey=${listKey}&contactinfo=${encodeURIComponent(contactInfo)}`;
+    // --- FIX: Using the correct API endpoint and URL parameters as per the documentation ---
+    const zohoApiUrl = `https://campaigns.zoho.${ZOHO_DATA_CENTER}/api/v1.1/addlistsubscribersinbulk`;
 
     const response = await fetch(zohoApiUrl, {
       method: 'POST',
@@ -53,10 +42,10 @@ exports.handler = async function (event) {
         'Authorization': `Zoho-oauthtoken ${accessToken}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: encodedBody
+      // The documentation for this endpoint expects the data in the body as form-encoded data.
+      body: `resfmt=JSON&listkey=${listKey}&emailids=${email}`
     });
     
-    // --- Enhanced Debugging ---
     const responseBodyText = await response.text();
     console.log("Response from Zoho API:", responseBodyText);
 
@@ -65,17 +54,9 @@ exports.handler = async function (event) {
     }
     
     const responseJson = JSON.parse(responseBodyText);
-    // Handle cases where the contact is already subscribed, which Zoho treats as a success.
     if (responseJson.status !== 'success' && responseJson.message !== 'Contact already subscribed.') {
-        // Handle specific error codes from the Zoho response if necessary
-        if (responseJson.code === 2402) { // Example: Contact is in Do-Not-Mail
-             console.log("Contact is in Do-Not-Mail registry.");
-             // Decide if this should be an error or a specific success message
-        } else {
-            throw new Error(`Zoho API Error: ${responseJson.message}`);
-        }
+        throw new Error(`Zoho API Error: ${responseJson.message}`);
     }
-
 
     return {
       statusCode: 200,
