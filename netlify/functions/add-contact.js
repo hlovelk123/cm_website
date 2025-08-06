@@ -28,25 +28,32 @@ exports.handler = async function (event) {
     const accessToken = await getZohoAccessToken();
     const listKey = process.env.ZOHO_LIST_KEY;
 
-    // --- FIX: Add mandatory fields as URL parameters ---
-    const zohoApiUrl = `https://campaigns.zoho.com/api/v1.1/addlistsubscribersinbulk?resfmt=JSON&listkey=${listKey}&emailids=${email}`;
+    // --- FIX: Use the 'listsubscribe' endpoint with contactinfo in the body ---
+    const zohoApiUrl = `https://campaigns.zoho.com/api/v1.1/json/listsubscribe`;
 
     const response = await fetch(zohoApiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Zoho-oauthtoken ${accessToken}`,
-      }
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      // Zoho expects this specific endpoint to receive form-encoded data
+      body: `resfmt=JSON&listkey=${listKey}&contactinfo=${JSON.stringify({"Contact Email": email})}`
     });
     
     // --- Enhanced Debugging ---
-    // First, get the response body as text to log it, regardless of status
     const responseBodyText = await response.text();
     console.log("Response from Zoho API:", responseBodyText);
 
     if (!response.ok) {
-      // If the response was not successful, throw an error with the details
       throw new Error(`Zoho API Error: Status ${response.status} - ${responseBodyText}`);
     }
+    
+    const responseJson = JSON.parse(responseBodyText);
+    if (responseJson.status !== 'success') {
+        throw new Error(`Zoho API Error: ${responseJson.message}`);
+    }
+
 
     return {
       statusCode: 200,
