@@ -1,4 +1,4 @@
-// /netlify/functions/add-contact.js
+// This file should be placed in: /netlify/functions/add-contact.js
 
 // A helper function to get a fresh access token from Zoho
 async function getZohoAccessToken() {
@@ -10,6 +10,8 @@ async function getZohoAccessToken() {
 
   const response = await fetch(url, { method: 'POST' });
   if (!response.ok) {
+    const errorBody = await response.text();
+    console.error("Failed to refresh Zoho token:", errorBody);
     throw new Error('Failed to refresh Zoho token');
   }
   const data = await response.json();
@@ -39,11 +41,15 @@ exports.handler = async function (event) {
         emailids: email,
       }),
     });
+    
+    // --- Enhanced Debugging ---
+    // First, get the response body as text to log it, regardless of status
+    const responseBodyText = await response.text();
+    console.log("Response from Zoho API:", responseBodyText);
 
     if (!response.ok) {
-      const errorBody = await response.text();
-      console.error('Zoho API Error:', errorBody);
-      throw new Error(`Zoho API Error: ${errorBody}`);
+      // If the response was not successful, throw an error with the details
+      throw new Error(`Zoho API Error: Status ${response.status} - ${responseBodyText}`);
     }
 
     return {
@@ -51,7 +57,7 @@ exports.handler = async function (event) {
       body: JSON.stringify({ message: 'Contact added successfully' }),
     };
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error('Error in function execution:', error.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Failed to add contact' }),
