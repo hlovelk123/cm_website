@@ -28,18 +28,14 @@ exports.handler = async function (event) {
     const accessToken = await getZohoAccessToken();
     const listKey = process.env.ZOHO_LIST_KEY;
 
-    const zohoApiUrl = `https://campaigns.zoho.com/api/v1.1/addlistsubscribersinbulk`;
+    // --- FIX: Add mandatory fields as URL parameters ---
+    const zohoApiUrl = `https://campaigns.zoho.com/api/v1.1/addlistsubscribersinbulk?resfmt=JSON&listkey=${listKey}&emailids=${email}`;
 
     const response = await fetch(zohoApiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Zoho-oauthtoken ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        listkey: listKey,
-        emailids: email,
-      }),
+      }
     });
     
     // --- Enhanced Debugging ---
