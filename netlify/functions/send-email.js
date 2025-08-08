@@ -14,17 +14,20 @@ exports.handler = async function (event, context) {
   const senderEmail = 'form@cmleos.org.lk'; 
   const recipientEmail = 'harrylklove@gmail.com';
 
+  // --- FIX: Simplified and more robust HTML to prevent body hash errors ---
   const emailData = {
     from: { address: senderEmail, name: "Leo Club Submissions" },
     to: [{ email_address: { address: recipientEmail } }],
     subject: `New Application from ${fullName}!`,
     htmlbody: `
+      <div>
         <p>You've received a new application from your "Coming Soon" page.</p>
         <p><strong>Name:</strong> ${fullName}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Contact:</strong> ${contact}</p>
         <p><strong>Reason for Joining:</strong></p>
         <p>${reason}</p>
+      </div>
     `,
   };
 
