@@ -111,11 +111,9 @@ exports.handler = async function (event, context) {
   };
 
   try {
-    // Send both emails concurrently
-    await Promise.all([
-      sendEmail(adminEmail),
-      sendEmail(userEmail)
-    ]);
+    // --- FIX: Send emails sequentially instead of concurrently ---
+    await sendEmail(adminEmail);
+    await sendEmail(userEmail);
 
     return {
       statusCode: 200,
