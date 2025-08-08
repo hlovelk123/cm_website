@@ -96,7 +96,7 @@ exports.handler = async function (event, context) {
     
     const headers = {
       'Accept': 'application/json',
-      'Authorization': `Zoho-enczapikey ${zeptoToken}`,
+      'Authorization': zeptoToken, // FIX: Use the token directly
       'Content-Type': 'application/json',
     };
     
