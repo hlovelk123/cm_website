@@ -10,70 +10,27 @@ exports.handler = async function (event, context) {
   const zeptoToken = process.env.ZEPTOMAIL_TOKEN;
 
   // --- REPLACE WITH YOUR EMAIL ADDRESSES ---
-  // This must be an email address from the domain you verified in ZeptoMail.
   const senderEmail = 'form@cmleos.org.lk'; 
   const recipientEmail = 'harrylklove@gmail.com';
 
-  // --- HTML Template for Admin Notification (with Inline Styles) ---
-  const adminEmailHtml = `
-    <!DOCTYPE html>
-    <html>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #333;">
-      <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 150px;">
-        </div>
-        <h2 style="color: #000;">New Application Received</h2>
-        <p>You've received a new application from the 'Coming Soon' page.</p>
-        <hr style="border: none; border-top: 1px solid #eee;">
-        <p><strong style="color: #000;">Name:</strong> ${fullName}</p>
-        <p><strong style="color: #000;">Email:</strong> ${email}</p>
-        <p><strong style="color: #000;">Contact:</strong> ${contact}</p>
-        <p><strong style="color: #000;">Reason for Joining:</strong></p>
-        <p>${reason}</p>
-      </div>
-    </body>
-    </html>
+  // --- A very simple plain text body for testing ---
+  const textBody = `
+    New Application Received:
+
+    Name: ${fullName}
+    Email: ${email}
+    Contact: ${contact}
+    Reason: ${reason}
   `;
 
-  // --- HTML Template for User Confirmation (with Inline Styles) ---
-  const userConfirmationHtml = `
-    <!DOCTYPE html>
-    <html>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #333;">
-      <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 150px;">
-        </div>
-        <h2 style="color: #000;">Thank You for Your Application!</h2>
-        <p>Hi ${fullName},</p>
-        <p>We've successfully received your application to join the Leo Club of Colombo Millennium. We're excited to learn more about you!</p>
-        <p>Our team will review your submission, and we will get in touch with you within <strong>3-5 business days</strong>.</p>
-        <p>Thank you for your interest in making a difference with us.</p>
-        <div style="font-size: 0.8em; color: #777; text-align: center; margin-top: 20px;">
-          <p>Leo Club of Colombo Millennium</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  // --- Prepare Email Data for Two Separate API Calls ---
-  const adminEmail = {
+  const emailData = {
     from: { address: senderEmail, name: "Leo Club Submissions" },
     to: [{ email_address: { address: recipientEmail } }],
-    subject: `New Application from ${fullName}!`,
-    htmlbody: adminEmailHtml,
+    subject: `Test Application from ${fullName}`,
+    textbody: textBody,
   };
 
-  const userEmail = {
-    from: { address: senderEmail, name: "Leo Club of Colombo Millennium" },
-    to: [{ email_address: { address: email, name: fullName } }],
-    subject: "We've Received Your Application!",
-    htmlbody: userConfirmationHtml,
-  };
-
-  const sendEmail = async (emailData) => {
+  try {
     const response = await fetch('https://api.zeptomail.com/v1.1/email', {
       method: 'POST',
       headers: {
@@ -89,28 +46,19 @@ exports.handler = async function (event, context) {
       console.error('ZeptoMail API Error:', errorBody);
       throw new Error(`ZeptoMail API Error: ${errorBody}`);
     }
-    return response.json();
-  };
-
-  try {
-    // --- Send emails sequentially for better reliability ---
-    console.log("Sending admin notification...");
-    await sendEmail(adminEmail);
-    console.log("Admin notification sent successfully.");
-
-    console.log("Sending user confirmation...");
-    await sendEmail(userEmail);
-    console.log("User confirmation sent successfully.");
+    
+    const data = await response.json();
+    console.log("Email sent successfully:", data);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Emails sent successfully" }),
+      body: JSON.stringify({ message: "Email sent successfully" }),
     };
   } catch (error) {
-    console.error('Error sending emails:', error.message);
+    console.error('Error sending email:', error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to send one or more emails' }),
+      body: JSON.stringify({ error: 'Failed to send email' }),
     };
   }
 };
