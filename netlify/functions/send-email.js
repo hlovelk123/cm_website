@@ -14,80 +14,66 @@ exports.handler = async function (event, context) {
   const recipientEmail = 'harrylklove@gmail.com';
   const replyToEmail = 'info@cmleos.org.lk'; // Use a professional reply-to address
 
-  // --- Beautiful HTML Template for Admin Notification (Blue Theme) ---
-  const adminEmailHtml = `<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 0 auto; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 2px; border-radius: 12px;">
-<div style="background: #ffffff; border-radius: 10px; overflow: hidden;">
-<div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px; text-align: center;">
-<img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 120px; height: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">
-<h1 style="color: #ffffff; margin: 20px 0 5px; font-size: 28px; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">New Application Alert</h1>
-<p style="color: #ffffff; margin: 0; font-size: 16px; opacity: 0.9;">Someone wants to join our Leo family!</p>
+  // --- Clean Dark Mode Admin Email ---
+  const adminEmailHtml = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #1a1a1a; border-radius: 8px; overflow: hidden;">
+<div style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); padding: 40px 20px; text-align: center;">
+<img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 120px; height: auto;">
+<h1 style="color: #ffffff; margin: 20px 0 0; font-size: 24px; font-weight: 600;">New Application Received</h1>
 </div>
-<div style="padding: 40px;">
-<div style="background: linear-gradient(45deg, #2563eb 0%, #1d4ed8 100%); padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-<h2 style="color: #ffffff; margin: 0; font-size: 20px; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">Application Details</h2>
+<div style="background-color: #1a1a1a; padding: 30px 20px;">
+<div style="background-color: #2a2a2a; border-radius: 8px; padding: 25px; margin-bottom: 20px;">
+<h2 style="color: #ffffff; margin: 0 0 20px; font-size: 18px;">Applicant Details</h2>
+<div style="margin-bottom: 15px;">
+<p style="color: #94a3b8; margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Full Name</p>
+<p style="color: #ffffff; margin: 5px 0 0; font-size: 16px; font-weight: 500;">${fullName}</p>
 </div>
-<div style="space-y: 20px;">
-<div style="border-left: 4px solid #3b82f6; padding: 15px 20px; background: #eff6ff; border-radius: 0 8px 8px 0; margin-bottom: 15px;">
-<p style="margin: 0; font-size: 14px; color: #1e40af; font-weight: 500;">FULL NAME</p>
-<p style="margin: 5px 0 0; font-size: 18px; color: #1e3a8a; font-weight: 600;">${fullName}</p>
+<div style="margin-bottom: 15px;">
+<p style="color: #94a3b8; margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Email</p>
+<p style="color: #ffffff; margin: 5px 0 0; font-size: 16px; font-weight: 500;">${email}</p>
 </div>
-<div style="border-left: 4px solid #2563eb; padding: 15px 20px; background: #dbeafe; border-radius: 0 8px 8px 0; margin-bottom: 15px;">
-<p style="margin: 0; font-size: 14px; color: #1e40af; font-weight: 500;">EMAIL ADDRESS</p>
-<p style="margin: 5px 0 0; font-size: 18px; color: #1e3a8a; font-weight: 600;">${email}</p>
+<div style="margin-bottom: 15px;">
+<p style="color: #94a3b8; margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Contact</p>
+<p style="color: #ffffff; margin: 5px 0 0; font-size: 16px; font-weight: 500;">${contact}</p>
 </div>
-<div style="border-left: 4px solid #1d4ed8; padding: 15px 20px; background: #f0f9ff; border-radius: 0 8px 8px 0; margin-bottom: 15px;">
-<p style="margin: 0; font-size: 14px; color: #1e40af; font-weight: 500;">CONTACT NUMBER</p>
-<p style="margin: 5px 0 0; font-size: 18px; color: #1e3a8a; font-weight: 600;">${contact}</p>
-</div>
-<div style="border-left: 4px solid #60a5fa; padding: 15px 20px; background: #eff6ff; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
-<p style="margin: 0; font-size: 14px; color: #1e40af; font-weight: 500;">WHY THEY WANT TO JOIN</p>
-<p style="margin: 10px 0 0; font-size: 16px; color: #1e3a8a; line-height: 1.6;">${reason}</p>
+<div style="margin-bottom: 0;">
+<p style="color: #94a3b8; margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Reason for Joining</p>
+<p style="color: #e2e8f0; margin: 0; font-size: 15px; line-height: 1.6; background-color: #374151; padding: 15px; border-radius: 6px;">${reason}</p>
 </div>
 </div>
-<div style="text-align: center; margin-top: 30px; padding: 20px; background: linear-gradient(45deg, #3b82f6, #1e3a8a); border-radius: 8px;">
-<p style="color: #ffffff; margin: 0; font-size: 14px; opacity: 0.9;">Ready to welcome a new Leo?</p>
-<p style="color: #ffffff; margin: 5px 0 0; font-size: 12px; opacity: 0.7;">Leo Club of Colombo Millennium</p>
-</div>
-<div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-<p style="color: #6b7280; margin: 0; font-size: 12px;">© 2025 Leo Club of Colombo Millennium. All rights reserved.</p>
-</div>
+<div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #374151;">
+<p style="color: #64748b; margin: 0; font-size: 12px;">© 2025 Leo Club of Colombo Millennium. All rights reserved.</p>
 </div>
 </div>
 </div>`;
 
-  // --- Beautiful HTML Template for User Confirmation (Blue Theme) ---
-  const userConfirmationHtml = `<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 0 auto; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 2px; border-radius: 12px;">
-<div style="background: #ffffff; border-radius: 10px; overflow: hidden;">
-<div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 40px 30px; text-align: center;">
-<img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 140px; height: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); margin-bottom: 20px;">
-<h1 style="color: #ffffff; margin: 0 0 10px; font-size: 32px; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Welcome to Our Journey!</h1>
-<p style="color: #ffffff; margin: 0; font-size: 18px; opacity: 0.9;">Your application has been received</p>
+  // --- Clean Dark Mode User Confirmation Email ---
+  const userConfirmationHtml = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #1a1a1a; border-radius: 8px; overflow: hidden;">
+<div style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); padding: 40px 20px; text-align: center;">
+<img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 140px; height: auto; margin-bottom: 20px;">
+<h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 600;">Welcome to Our Journey!</h1>
+<p style="color: #e2e8f0; margin: 10px 0 0; font-size: 16px;">Your application has been received</p>
 </div>
-<div style="padding: 40px;">
-<div style="text-align: center; margin-bottom: 30px;">
-<div style="display: inline-block; background: linear-gradient(45deg, #2563eb 0%, #1d4ed8 100%); padding: 15px 30px; border-radius: 25px;">
-<p style="color: #ffffff; margin: 0; font-size: 16px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">Thank You, ${fullName}!</p>
+<div style="background-color: #1a1a1a; padding: 30px 20px;">
+<div style="text-align: center; margin-bottom: 25px;">
+<div style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 20px; font-size: 16px; font-weight: 500;">Thank You, ${fullName}!</div>
 </div>
+<div style="background-color: #2a2a2a; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
+<p style="color: #ffffff; margin: 0 0 15px; font-size: 18px; line-height: 1.6; text-align: center;">We have successfully received your application to join the <strong style="color: #3b82f6;">Leo Club of Colombo Millennium</strong>.</p>
+<p style="color: #e2e8f0; margin: 0; font-size: 16px; line-height: 1.6; text-align: center;">We are excited to learn more about you and your passion for service!</p>
 </div>
-<div style="background: linear-gradient(45deg, #eff6ff, #dbeafe); padding: 30px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #bfdbfe;">
-<p style="color: #1e3a8a; margin: 0 0 15px; font-size: 18px; line-height: 1.6; text-align: center;">We have successfully received your application to join the <strong style="color: #1e40af;">Leo Club of Colombo Millennium</strong>.</p>
-<p style="color: #1e40af; margin: 0; font-size: 16px; line-height: 1.6; text-align: center;">We are excited to learn more about you and your passion for service!</p>
-</div>
-<div style="border: 2px solid #3b82f6; border-radius: 12px; padding: 25px; margin-bottom: 25px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+<div style="background-color: #374151; border: 1px solid #4b5563; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 <div style="text-align: center; margin-bottom: 15px;">
-<div style="display: inline-block; background: #3b82f6; color: #ffffff; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">NEXT STEPS</div>
+<div style="display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 6px 14px; border-radius: 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Next Steps</div>
 </div>
-<p style="color: #1e3a8a; margin: 0 0 10px; font-size: 16px; text-align: center; font-weight: 600;">Our team will review your submission</p>
-<p style="color: #1e40af; margin: 0; font-size: 20px; text-align: center; font-weight: 700;">We will contact you within 3-5 business days</p>
+<p style="color: #ffffff; margin: 0 0 8px; font-size: 16px; text-align: center; font-weight: 500;">Our team will review your submission</p>
+<p style="color: #3b82f6; margin: 0; font-size: 18px; text-align: center; font-weight: 600;">We will contact you within 3-5 business days</p>
 </div>
-<div style="text-align: center; padding: 25px; background: linear-gradient(45deg, #3b82f6, #1e3a8a); border-radius: 12px;">
-<p style="color: #ffffff; margin: 0 0 8px; font-size: 16px; font-weight: 600;">Ready to make a difference together?</p>
-<p style="color: #ffffff; margin: 0; font-size: 14px; opacity: 0.9;">Thank you for choosing to serve with Leo Club of Colombo Millennium</p>
+<div style="background-color: #2a2a2a; padding: 20px; border-radius: 8px; text-align: center;">
+<p style="color: #ffffff; margin: 0 0 5px; font-size: 16px; font-weight: 500;">Ready to make a difference together?</p>
+<p style="color: #94a3b8; margin: 0; font-size: 14px;">Thank you for choosing to serve with Leo Club of Colombo Millennium</p>
 </div>
-<div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-<p style="color: #6b7280; margin: 0 0 5px; font-size: 12px;">Leo Club of Colombo Millennium</p>
-<p style="color: #6b7280; margin: 0; font-size: 12px;">© 2025 Leo Club of Colombo Millennium. All rights reserved.</p>
-</div>
+<div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #374151;">
+<p style="color: #64748b; margin: 0; font-size: 12px;">© 2025 Leo Club of Colombo Millennium. All rights reserved.</p>
 </div>
 </div>
 </div>`;
