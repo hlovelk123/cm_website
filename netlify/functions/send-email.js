@@ -111,18 +111,21 @@ exports.handler = async function (event, context) {
   };
 
   try {
-    // Send both emails concurrently
-    await Promise.all([
-      sendEmail(adminEmail),
-      sendEmail(userEmail)
-    ]);
+    // --- FIX: Send emails sequentially for better reliability ---
+    console.log("Sending admin notification...");
+    await sendEmail(adminEmail);
+    console.log("Admin notification sent successfully.");
+
+    console.log("Sending user confirmation...");
+    await sendEmail(userEmail);
+    console.log("User confirmation sent successfully.");
 
     return {
       statusCode: 200,
       body: JSON.stringify({ message: "Emails sent successfully" }),
     };
   } catch (error) {
-    console.error('Error sending emails:', error);
+    console.error('Error sending emails:', error.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Failed to send one or more emails' }),
