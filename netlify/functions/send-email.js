@@ -96,7 +96,7 @@ exports.handler = async function (event, context) {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Authorization': zeptoToken,
+        'Authorization': `Zoho-enczapikey ${zeptoToken}`, // CORRECTED HEADER FORMAT
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(emailData),
