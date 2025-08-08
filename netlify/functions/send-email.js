@@ -76,26 +76,23 @@ exports.handler = async function (event, context) {
     </html>
   `;
 
-  // --- Batch Email Data ---
-  const emailData = [
-    // Email to Admin
-    {
-      from: { address: senderEmail, name: "Leo Club Submissions" },
-      to: [{ email_address: { address: recipientEmail } }],
-      subject: `New Application from ${fullName}!`,
-      htmlbody: adminEmailHtml,
-    },
-    // Email to User
-    {
-      from: { address: senderEmail, name: "Leo Club of Colombo Millennium" },
-      to: [{ email_address: { address: email, name: fullName } }],
-      subject: "We've Received Your Application!",
-      htmlbody: userConfirmationHtml,
-    }
-  ];
+  // --- Prepare Email Data for Two Separate API Calls ---
+  const adminEmail = {
+    from: { address: senderEmail, name: "Leo Club Submissions" },
+    to: [{ email_address: { address: recipientEmail } }],
+    subject: `New Application from ${fullName}!`,
+    htmlbody: adminEmailHtml,
+  };
 
-  try {
-    const response = await fetch('https://api.zeptomail.com/v1.1/email/batch', {
+  const userEmail = {
+    from: { address: senderEmail, name: "Leo Club of Colombo Millennium" },
+    to: [{ email_address: { address: email, name: fullName } }],
+    subject: "We've Received Your Application!",
+    htmlbody: userConfirmationHtml,
+  };
+
+  const sendEmail = async (emailData) => {
+    const response = await fetch('https://api.zeptomail.com/v1.1/email', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -108,19 +105,27 @@ exports.handler = async function (event, context) {
     if (!response.ok) {
       const errorBody = await response.text();
       console.error('ZeptoMail API Error:', errorBody);
-      return { statusCode: response.status, body: `ZeptoMail API Error: ${errorBody}` };
+      throw new Error(`ZeptoMail API Error: ${errorBody}`);
     }
+    return response.json();
+  };
 
-    const data = await response.json();
+  try {
+    // Send both emails concurrently
+    await Promise.all([
+      sendEmail(adminEmail),
+      sendEmail(userEmail)
+    ]);
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Emails sent successfully", data }),
+      body: JSON.stringify({ message: "Emails sent successfully" }),
     };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error sending emails:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to send email' }),
+      body: JSON.stringify({ error: 'Failed to send one or more emails' }),
     };
   }
 };
