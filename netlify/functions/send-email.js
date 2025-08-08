@@ -92,13 +92,19 @@ exports.handler = async function (event, context) {
   };
 
   const sendEmail = async (emailData) => {
+    console.log("Preparing to send email with data:", JSON.stringify(emailData, null, 2));
+    
+    const headers = {
+      'Accept': 'application/json',
+      'Authorization': `Zoho-enczapikey ${zeptoToken}`,
+      'Content-Type': 'application/json',
+    };
+    
+    console.log("Headers being sent:", headers);
+
     const response = await fetch('https://api.zeptomail.com/v1.1/email', {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Zoho-enczapikey ${zeptoToken}`,
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: JSON.stringify(emailData),
     });
 
@@ -112,8 +118,13 @@ exports.handler = async function (event, context) {
 
   try {
     // --- Send emails sequentially for better reliability ---
+    console.log("Attempting to send admin notification...");
     await sendEmail(adminEmail);
+    console.log("Admin notification sent successfully.");
+
+    console.log("Attempting to send user confirmation...");
     await sendEmail(userEmail);
+    console.log("User confirmation sent successfully.");
 
     return {
       statusCode: 200,
