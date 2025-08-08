@@ -96,7 +96,7 @@ exports.handler = async function (event, context) {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Authorization': `Zoho-enczapikey ${zeptoToken}`, // CORRECTED HEADER FORMAT
+        'Authorization': `Zoho-enczapikey ${zeptoToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(emailData),
@@ -111,9 +111,11 @@ exports.handler = async function (event, context) {
   };
 
   try {
-    // --- FIX: Send emails sequentially to ensure reliability ---
-    await sendEmail(adminEmail);
-    await sendEmail(userEmail);
+    // Send both emails concurrently
+    await Promise.all([
+      sendEmail(adminEmail),
+      sendEmail(userEmail)
+    ]);
 
     return {
       statusCode: 200,
