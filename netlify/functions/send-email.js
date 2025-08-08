@@ -14,7 +14,7 @@ exports.handler = async function (event, context) {
   const senderEmail = 'form@cmleos.org.lk'; 
   const recipientEmail = 'harrylklove@gmail.com';
 
-  // --- HTML Template for Admin Notification (with Inline Styles) ---
+  // --- HTML Template for Admin Notification ---
   const adminEmailHtml = `
     <!DOCTYPE html>
     <html>
@@ -36,13 +36,14 @@ exports.handler = async function (event, context) {
     </html>
   `;
 
-  // --- HTML Template for User Confirmation (with Inline Styles) ---
+  // --- HTML Template for User Confirmation ---
   const userConfirmationHtml = `
     <!DOCTYPE html>
     <html>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #333;">
       <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
         <div style="text-align: center; margin-bottom: 20px;">
+          <img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 150px;">
         </div>
         <h2 style="color: #000;">Thank You for Your Application!</h2>
         <p>Hi ${fullName},</p>
@@ -62,14 +63,14 @@ exports.handler = async function (event, context) {
     from: { address: senderEmail, name: "Leo Club Submissions" },
     to: [{ email_address: { address: recipientEmail } }],
     subject: `New Application from ${fullName}!`,
-    htmlbody: adminEmailHtml,
+    htmlbody: Buffer.from(adminEmailHtml).toString('base64'),
   };
 
   const userEmail = {
     from: { address: senderEmail, name: "Leo Club of Colombo Millennium" },
     to: [{ email_address: { address: email, name: fullName } }],
     subject: "We've Received Your Application!",
-    htmlbody: userConfirmationHtml,
+    htmlbody: Buffer.from(userConfirmationHtml).toString('base64'),
   };
 
   const sendEmail = async (emailData) => {
