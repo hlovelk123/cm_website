@@ -14,48 +14,29 @@ exports.handler = async function (event, context) {
   const senderEmail = 'form@cmleos.org.lk'; 
   const recipientEmail = 'harrylklove@gmail.com';
 
-  // --- HTML Template for Admin Notification (with Inline Styles) ---
-  const adminEmailHtml = `
-    <!DOCTYPE html>
-    <html>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #333;">
-      <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 150px;">
-        </div>
-        <h2 style="color: #000;">New Application Received</h2>
-        <p>You've received a new application from the 'Coming Soon' page.</p>
-        <hr style="border: none; border-top: 1px solid #eee;">
-        <p><strong style="color: #000;">Name:</strong> ${fullName}</p>
-        <p><strong style="color: #000;">Email:</strong> ${email}</p>
-        <p><strong style="color: #000;">Contact:</strong> ${contact}</p>
-        <p><strong style="color: #000;">Reason for Joining:</strong></p>
-        <p>${reason}</p>
-      </div>
-    </body>
-    </html>
+  // --- Plain Text Template for Admin Notification ---
+  const adminEmailText = `
+You've received a new application from your "Coming Soon" page.
+
+Name: ${fullName}
+Email: ${email}
+Contact: ${contact}
+Reason for Joining:
+${reason}
   `;
 
-  // --- HTML Template for User Confirmation (with Inline Styles) ---
-  const userConfirmationHtml = `
-    <!DOCTYPE html>
-    <html>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #333;">
-      <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <img src="https://raw.githubusercontent.com/hlovelk123/website-assets/refs/heads/main/Club%20Logo%20Trans.png" alt="Leo Club Logo" style="max-width: 150px;">
-        </div>
-        <h2 style="color: #000;">Thank You for Your Application!</h2>
-        <p>Hi ${fullName},</p>
-        <p>We've successfully received your application to join the Leo Club of Colombo Millennium. We're excited to learn more about you!</p>
-        <p>Our team will review your submission, and we will get in touch with you within <strong>3-5 business days</strong>.</p>
-        <p>Thank you for your interest in making a difference with us.</p>
-        <div style="font-size: 0.8em; color: #777; text-align: center; margin-top: 20px;">
-          <p>Leo Club of Colombo Millennium</p>
-        </div>
-      </div>
-    </body>
-    </html>
+  // --- Plain Text Template for User Confirmation ---
+  const userConfirmationText = `
+Hi ${fullName},
+
+We've successfully received your application to join the Leo Club of Colombo Millennium. We're excited to learn more about you!
+
+Our team will review your submission, and we will get in touch with you within 3-5 business days.
+
+Thank you for your interest in making a difference with us.
+
+Sincerely,
+The Leo Club of Colombo Millennium
   `;
 
   // --- Prepare Email Data for Two Separate API Calls ---
@@ -63,14 +44,14 @@ exports.handler = async function (event, context) {
     from: { address: senderEmail, name: "Leo Club Submissions" },
     to: [{ email_address: { address: recipientEmail } }],
     subject: `New Application from ${fullName}!`,
-    htmlbody: adminEmailHtml,
+    textbody: adminEmailText,
   };
 
   const userEmail = {
     from: { address: senderEmail, name: "Leo Club of Colombo Millennium" },
     to: [{ email_address: { address: email, name: fullName } }],
     subject: "We've Received Your Application!",
-    htmlbody: userConfirmationHtml,
+    textbody: userConfirmationText,
   };
 
   const sendEmail = async (emailData) => {
