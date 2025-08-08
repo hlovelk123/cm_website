@@ -111,7 +111,7 @@ exports.handler = async function (event, context) {
   };
 
   try {
-    // --- FIX: Send emails sequentially instead of concurrently ---
+    // --- FIX: Send emails sequentially to ensure reliability ---
     await sendEmail(adminEmail);
     await sendEmail(userEmail);
 
