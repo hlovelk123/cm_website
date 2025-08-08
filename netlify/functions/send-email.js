@@ -14,16 +14,15 @@ exports.handler = async function (event, context) {
   const senderEmail = 'form@cmleos.org.lk'; 
   const recipientEmail = 'harrylklove@gmail.com';
 
-  // --- FIX: Sending as plain text to ensure DKIM body hash verification ---
-  const textBody = `
-    You've received a new application from your "Coming Soon" page.
-
-    Name: ${fullName}
-    Email: ${email}
-    Contact: ${contact}
-    Reason for Joining:
-    ${reason}
-  `;
+  // --- FIX: Using a very clean plain text body to ensure DKIM passes ---
+  const textBody = [
+    `You've received a new application from your "Coming Soon" page.`,
+    `Name: ${fullName}`,
+    `Email: ${email}`,
+    `Contact: ${contact}`,
+    `Reason for Joining:`,
+    reason
+  ].join('\n\n');
 
   const emailData = {
     from: { address: senderEmail, name: "Leo Club Submissions" },
