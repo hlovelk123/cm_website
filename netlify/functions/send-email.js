@@ -319,12 +319,14 @@ exports.handler = async function (event, context) {
       .mobile-logo { max-width: 80px !important; }
       .mobile-button { padding: 14px 20px !important; font-size: 16px !important; display: block !important; }
       .mobile-social-spacing { margin: 0 8px !important; }
+      .mobile-bold { font-weight: 600 !important; font-size: inherit !important; }
     }
     
     @media only screen and (max-width: 480px) {
       .mobile-padding { padding-left: 15px !important; padding-right: 15px !important; }
       .mobile-text-20 { font-size: 20px !important; line-height: 24px !important; }
       .mobile-text-14 { font-size: 14px !important; line-height: 20px !important; }
+      .mobile-bold { font-weight: 600 !important; font-size: inherit !important; }
     }
     
     /* Prevent auto-linking */
@@ -386,7 +388,7 @@ exports.handler = async function (event, context) {
             <tr>
               <td align="center">
                 <p class="mobile-text-15 mobile-text-14" style="color:#334155; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:16px; line-height:27px; margin:0; text-align:center;">
-                  We're excited to review your application to join the <strong style="white-space:nowrap;">Leo Club of Colombo Millennium</strong>.<br>Our team will carefully go over your submission and will contact you within <strong>3-5 business days</strong> with the next steps.
+                  We're excited to review your application to join the <strong class="mobile-bold" style="white-space:nowrap;">Leo Club of Colombo Millennium</strong>.<br>Our team will carefully go over your submission and will contact you within <strong class="mobile-bold">3-5 business days</strong> with the next steps.
                 </p>
               </td>
             </tr>
@@ -431,7 +433,7 @@ exports.handler = async function (event, context) {
                   <tr>
                     <td style="padding:20px; text-align:center;">
                       <p style="color:#1e293b; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:16px; font-weight:600; line-height:20px; margin:0 0 12px 0;">
-                        Get in touch with us.
+                        Get in touch with us
                       </p>
                       <table border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
