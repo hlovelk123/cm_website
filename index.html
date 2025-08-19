@@ -33,6 +33,15 @@
             max-height: 100px; /* Adjust as needed */
             opacity: 1;
         }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
 <body class="bg-black">
@@ -167,7 +176,7 @@
                                     <h2 className="text-3xl font-bold mb-2 text-center" style={{ fontFamily: "'Lobster', cursive" }}>Join Our Family</h2>
                                     <p className="text-center mb-6 text-white/80">Tell us a bit about yourself.</p>
                                 </div>
-                                <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-2 flex-grow">
+                                <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-2 flex-grow no-scrollbar">
                                     <div>
                                         <label htmlFor="fullName" className="block text-sm font-medium text-white/90 mb-1 text-left">Full Name</label>
                                         <input type="text" id="fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} required className={`w-full bg-white/10 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all ${errors.fullName ? 'border-red-500 focus:ring-red-500' : 'border-white/20 focus:ring-sky-400'}`} />
